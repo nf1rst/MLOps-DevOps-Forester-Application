@@ -1,0 +1,57 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="navigation">
+        <NavMenu />
+    </div>
+
+    <div class="display-screen">
+        <main>
+            @Body
+        </main>
+    </div>
+</div>
+
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .page {
+        font-family: 'Ubuntu Mono';
+        padding: 0;
+        margin: 0;
+    }
+
+    .navigation {
+        width: 100%;
+        display: block;
+        position: fixed;
+        z-index: 1000;
+        padding: 0;
+        margin: 0;
+    }
+
+    .display-screen {
+        background-color: rgb(37, 38, 37);
+        color: olivedrab;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        z-index: 100;
+        height: 100%;
+        margin-top: 2.1%;
+        position: fixed;
+    }
+</style>

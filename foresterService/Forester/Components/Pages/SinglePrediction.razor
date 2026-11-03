@@ -1,0 +1,175 @@
+﻿@page "/singlePrediction"
+@using System.Text.RegularExpressions
+@using forester.Domain.Entities
+
+@rendermode InteractiveServer
+@* https://stackoverflow.com/questions/65349476/blazor-cant-find-referenced-component-from-other-folder *@
+
+
+<h2>Single Prediction</h2>
+
+<h6>Please enter values for single prediction of cover</h6>
+
+<div class="input-container">
+    <div class="input-row">
+        <label>Elevation</label>
+        @*https://stackoverflow.com/questions/69888168/how-to-set-input-box-value-to-a-string-in-blazor-webassembly *@
+        <input type="number" @bind="modelParameters.Elevation" />
+    </div>
+    <div class="input-row">
+        <label>Aspect</label>
+        <input type="number" @bind="modelParameters.Aspect" />
+    </div>
+    <div class="input-row">
+        <label>Slope</label>
+        <input type="number" @bind="modelParameters.Slope" />
+    </div>
+    <div class="input-row">
+        <label>Vertical distance to hydrology</label>
+        <input type="number" @bind="modelParameters.Vertical_Distance_To_Hydrology" />
+    </div>
+    <div class="input-row">
+        <label>Horizontal distance to hydrology</label>
+        <input type="number" @bind="modelParameters.Horizontal_Distance_To_Hydrology" />
+    </div>
+    <div class="input-row">
+        <label>Horizontal distance to roadways</label>
+        <input type="number" @bind="modelParameters.Horizontal_Distance_To_Roadways" />
+    </div>
+    <div class="input-row">
+        <label>Hillshade at 9 am</label>
+        <input type="number" @bind="modelParameters.Hillshade_9am" />
+    </div>
+    <div class="input-row">
+        <label>Hillshade at 12 am </label>
+        <input type="number" @bind="modelParameters.Hillshade_Noon" />
+    </div>
+    <div class="input-row">
+        <label>Hillshade at 3 pm</label>
+        <input type="number" @bind="modelParameters.Hillshade_3pm" />
+    </div>
+    <div class="input-row">
+        <label>Horizontal distance to fire points </label>
+        <input type="number" @bind="modelParameters.Horizontal_Distance_To_Fire_Points" />
+    </div>
+    <div class="input-row">
+        <label>Wilderness area (1-4) </label>
+        <input type="number" @bind="modelParameters.Wilderness_Area" />
+    </div>
+    <div class="input-row">
+        <label>Soil type (1-40) </label>
+        <input type="number" @bind="modelParameters.Soil_Type" />
+    </div>
+    <button class="submit" type="button" @onclick="HandlePrediction">Submit input data</button>
+    <div class="error-container">
+        <p class="error-text">@errorMessage</p>
+    </div>
+
+    <div class="model-answer-area">
+        <label>Model answer: </label>
+        <p className="model-answer">@modelPredictionResult</p>
+    </div>
+
+</div>
+
+
+<style>
+    h2,
+    h6 {
+        text-align: center;
+        margin-top: 1%;
+    }
+
+    .submit {
+        margin-top: 2%;
+        background-color: darkorange;
+        width: 50%;
+    }
+
+    .error-text {
+        color: red;
+    }
+
+    .input-container {
+        width: 60%;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    .input-row {
+        width: 70%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 2%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .model-answer-area {
+        border: 1px solid orange;
+        width: 70%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+@code {
+    private ModelPrediction modelParameters = new();
+    private string errorMessage = String.Empty;
+    private const string modelContactURL = "http://fastapi-app:8000/";
+    private int modelPredictionResult = 0;
+
+    private async Task HandlePrediction()
+    {
+        if (validInputValues(modelParameters))
+        {
+            try
+            {
+                HttpClient client = new HttpClient();
+                client.BaseAddress = new Uri(modelContactURL);
+
+                HttpResponseMessage response = await client.PostAsJsonAsync("predict", modelParameters, new
+System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = null
+                });
+
+
+                //https://stackoverflow.com/questions/4734116/find-and-extract-a-number-from-a-string
+                string predictionResultString = Regex.Match(await response.Content.ReadAsStringAsync(), @"\d+").Value;
+
+                modelPredictionResult = int.Parse(predictionResultString);
+
+                StateHasChanged();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Connection to API failed: {e.Message}");
+                errorMessage = "Model cannot be contacted, blame the developers and please try again later";
+            }
+            //https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient
+            //contact FASTAPI for model prediciton
+
+        }
+        else
+        {
+            errorMessage = "Invalid input values detected, please try again";
+        }
+
+    }
+
+    private bool validInputValues(ModelPrediction model)
+    {
+        return true;
+        //TODO
+    }
+
+    private bool HillshadeBetween0And255(int hillshade)
+    {
+        return (hillshade >= 0 && hillshade <= 255);
+    }
+
+}
+

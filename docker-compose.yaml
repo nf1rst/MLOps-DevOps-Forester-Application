@@ -1,0 +1,45 @@
+services:
+  mlflow-server:
+    build: ./mlflowServer
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlflow-data:/mlflow
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  fastapi-app:
+    build: ./mlService
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-server:5000
+      - MLFLOW_HTTP_REQUEST_MAX_RETRIES=0
+      - MLFLOW_HTTP_REQUEST_TIMEOUT=10
+    depends_on:
+      mlflow-server:
+        condition: service_healthy
+
+  forester-web-app:
+    build: ./foresterService
+    ports:
+      - 8080:8080
+    depends_on:
+      fastapi-app:
+        condition: service_started
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "IReallyHopeThisWork5!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+volumes:
+  mssql_data:

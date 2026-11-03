@@ -1,0 +1,112 @@
+﻿@page "/instructions"
+
+<h2>Instructions</h2>
+
+<h3>This page contains secrets about the application's work principles</h3>
+
+
+
+<div class="notification-area">
+    <div class="notification-bubble">
+        <p class="notification-title">Single Prediction</p>
+        <p class="notification-text">Enter the information in the order it is displayed on the screen. Hit the predict
+            button to get a single prediction bsaed on your input data</p>
+        </div>
+        <div class="notification-bubble">
+            <p class="notification-title">Batch Prediction</p>
+            <p class="notification-text">Make sure you have a CSV file containing the data for a forest area. The order of
+                the inputs matters, and is stated at the top of the page. When sure, upload the CSV and click predict</p>
+            </div>
+            <div class="notification-bubble">
+                <p class="notification-title">History overview</p>
+                <p class="notification-text">Every prediction made with your inputs is visible in your profile</p>
+            </div>
+
+        </div>
+
+        <div class="input-information">
+            <h4>Input data format</h4>
+            <p class="input-paragraph">The input information order for the CSV file MUST be as follows:
+                <ul class="input-list">
+                    <li>Elevation [meters]</li>
+                    <li>Aspect [azimuth]</li>
+                    <li>Slope [degrees] </li>
+                    <li>Horizontal distance to hydrology [meters] </li>
+                    <li>Vertical distance to hydrology [meters]</li>
+                    <li>Horizontal distance to roadways [meters]</li>
+                    <li>Hillshade at 9am (0-255) [index] </li>
+                    <li>Hillshade at noon (0-255) [index] </li>
+                    <li>Hillshade at 5pm (0-255) [index] </li>
+                    <li>Horizontal distance to fire points [meters] </li>
+                    <li>Wilderness area (1-4 in binary columns) [absence or presence]</li>
+                    <li>Soil type(1-40 in binary columns) [absence or presence]</li>
+                </ul>
+                <h4>Result range</h4>
+                <p class="result-paragraph">The possible results of prediction are as follows:
+                    <ol class="cover-list">
+                        <li>1: Spruce/Fir</li>
+                        <li>2: Lodgepole Pine</li>
+                        <li>3: Ponderosa Pine</li>
+                        <li>4: Cottonwood/Willow </li>
+                        <li>5: Aspen</li>
+                        <li>6: Douglas-fir</li>
+                        <li>7: Krummholz</li>
+
+                    </ol>
+                </p>
+            </p>
+        </div>
+
+        <style>
+            h2,
+            h3,
+            h4 {
+                text-align: center;
+                margin-top: 1%;
+            }
+
+            .notification-area {
+                width: 90%;
+                margin-left: auto;
+                margin-right: auto;
+                display: flex;
+                justify-content: space-evenly;
+            }
+
+            .notification-bubble {
+                width: 31%;
+                border: 1px solid darkorange;
+                padding: 0.5%;
+                text-align: justify;
+            }
+
+            .notification-title {
+                border-bottom: 1px solid orange;
+            }
+
+            .input-information {
+                margin-left: auto;
+                margin: auto;
+                text-align: center;
+                margin-top: 1%;
+            }
+
+            .input-list {
+                list-style-type: circle;
+            }
+
+            .cover-list {
+                text-align: center;
+                width: 40%;
+                margin-left: auto;
+                margin-right: auto;
+                list-style: none;
+            }
+
+            .cover-list li,
+            .input-list li {
+                border-left: 1px solid orange;
+                border-right: 1px solid orange;
+
+            }
+        </style>

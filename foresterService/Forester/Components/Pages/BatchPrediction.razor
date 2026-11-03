@@ -1,0 +1,69 @@
+﻿@page "/batchPrediction"
+@rendermode InteractiveServer
+
+
+<h2>Batch Prediction</h2>
+
+<h6>Please upload a CSV file with input values - the order of the values is specified in the instructions page </h6>
+
+@* https://amarozka.dev/blazor-file-uploads-downloads/ *@
+<div class="upload-area">
+    <InputFile class="upload-element" OnChange="OnInputFileChange"></InputFile>
+    <button class="submit" type="button" @onclick="HandleFileUpload">Submit input data</button>
+    <p class="error">@errorMessage</p>
+</div>
+
+<style>
+    h6,
+    h2 {
+        text-align: center;
+        margin-top: 1%
+    }
+
+    .upload-area {
+        background-color: red;
+        width: 40%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .upload-element {
+        background-color: darkorange;
+        border-radius: 5px;
+        color: black;
+        height: 200px;
+        align-content: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+
+@code {
+    private IBrowserFile? selectedFile;
+    private string errorMessage = "";
+
+    private void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+    }
+    private async Task HandleFileUpload()
+    {
+        if (selectedFile is null)
+        {
+            errorMessage = "No file selected, please try again";
+            return;
+        }
+        using Stream? fileStream = selectedFile.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10);
+        using var reader = new StreamReader(fileStream);
+
+        string content = await reader.ReadToEndAsync();
+        string[] lines = content.Split("\n");
+        
+
+        @* serijalizacija svake linije u objekt 
+        objekt ide u listu 
+        lista ide prema fastAPI endpoitnu
+        vraca nazad odgovore *@
+    }
+}

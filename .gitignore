@@ -1,0 +1,66 @@
+# ==========================================
+# Python / ML Services (.venv, MLflow, Cache)
+# ==========================================
+.venv/
+venv/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+mlflow.db
+mlruns/
+*.log
+
+#local 
+azagent/
+secrets/
+devops-mlops/
+.vscode/
+
+# ==========================================
+# C# / .NET Services (Blazor, Binaries)
+# ==========================================
+[Bb][Ii][Nn]/
+[Oo][Bb][Jj]/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ==========================================
+# DVC (Data Version Control)
+# Ignore raw local datasets, keep .dvc pointers
+# ==========================================
+/mlService/data/*.data
+/mlService/data/*.csv
+/mlService/data/*.parquet
+/mlService/data/*.zip
+!/mlService/data/*.dvc
+!/mlService/data/.gitignore
+
+# ==========================================
+# Database & Local Environment Files
+# ==========================================
+*.db
+*.sqlite
+*.mdf
+*.ldf
+.env
+.env.local
+
+# ==========================================
+# OS Generated Files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
