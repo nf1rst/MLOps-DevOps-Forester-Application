@@ -10,4 +10,12 @@
     <ProjectReference Include="../Forester.DAL/Forester.DAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.3.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.13" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.14" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0"/>
+  </ItemGroup>
+
 </Project>

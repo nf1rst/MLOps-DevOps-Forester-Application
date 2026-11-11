@@ -1,0 +1,68 @@
+﻿@page "/login"
+@using System.Security.Claims
+@using Forester.Application.Interfaces
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Microsoft.AspNetCore.Http;
+
+@inject IAuthService authService
+@inject NavigationManager navigationManager
+
+<h3>Login</h3>
+<div class="login-form">
+    <form method="post" action="/api/auth/login">
+        <label>Username</label>
+        <input class="input-username" type="text" name="username" />
+        <label>Password</label>
+        <input class="input-password" type="password" name="password" />
+        <button type="submit">Login</button>
+    </form>
+    <p class="no-aacount-p">Dont't have an account? <a href="register">Click to register</a></p>
+</div>
+
+<style>
+    h3 {
+        width: 10%;
+        margin-left: auto;
+        margin: auto;
+        text-align: center;
+        margin-top: 1%;
+        margin-bottom: 2%;
+    }
+
+    .login-form {
+        background-color: black;
+        width: 30%;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    label {
+        display: block;
+    }
+
+    input {
+        width: 70%;
+    }
+
+    button {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 1%;
+        width: 40%;
+        background-color: darkolivegreen;
+    }
+
+    p a {
+        color: orange;
+    }
+</style>
+
+@code {
+    private string username = String.Empty;
+    private string password = String.Empty;
+    private string message = "";
+}

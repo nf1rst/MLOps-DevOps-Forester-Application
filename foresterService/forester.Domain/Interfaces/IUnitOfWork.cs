@@ -4,6 +4,7 @@ namespace forester.Domain.Interfaces;
 
 public interface IUnitOfWork : IDisposable
 {
-    IModelPredictionRepository Predictions { get; }
+    ILogRepository Logs { get; }
+    IUserRepository Users { get; }
     Task<int> SaveChangesAsync();
 }

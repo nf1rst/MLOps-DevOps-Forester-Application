@@ -2,7 +2,7 @@ using System;
 
 namespace forester.Domain.Entities;
 
-public class ModelPrediction
+public class UserInputs
 {
     //public int Id { get; set; }
     public int Elevation { get; set; } = 2900;

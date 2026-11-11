@@ -1,10 +1,13 @@
 ﻿@page "/singlePrediction"
 @using System.Text.RegularExpressions
+@using Forester.Application.Services
 @using forester.Domain.Entities
+@using Microsoft.AspNetCore.Components;
 
 @rendermode InteractiveServer
 @* https://stackoverflow.com/questions/65349476/blazor-cant-find-referenced-component-from-other-folder *@
 
+@inject ILogService logService
 
 <h2>Single Prediction</h2>
 
@@ -14,51 +17,51 @@
     <div class="input-row">
         <label>Elevation</label>
         @*https://stackoverflow.com/questions/69888168/how-to-set-input-box-value-to-a-string-in-blazor-webassembly *@
-        <input type="number" @bind="modelParameters.Elevation" />
+        <input type="number" @bind="userInputs.Elevation" />
     </div>
     <div class="input-row">
         <label>Aspect</label>
-        <input type="number" @bind="modelParameters.Aspect" />
+        <input type="number" @bind="userInputs.Aspect" />
     </div>
     <div class="input-row">
         <label>Slope</label>
-        <input type="number" @bind="modelParameters.Slope" />
+        <input type="number" @bind="userInputs.Slope" />
     </div>
     <div class="input-row">
         <label>Vertical distance to hydrology</label>
-        <input type="number" @bind="modelParameters.Vertical_Distance_To_Hydrology" />
+        <input type="number" @bind="userInputs.Vertical_Distance_To_Hydrology" />
     </div>
     <div class="input-row">
         <label>Horizontal distance to hydrology</label>
-        <input type="number" @bind="modelParameters.Horizontal_Distance_To_Hydrology" />
+        <input type="number" @bind="userInputs.Horizontal_Distance_To_Hydrology" />
     </div>
     <div class="input-row">
         <label>Horizontal distance to roadways</label>
-        <input type="number" @bind="modelParameters.Horizontal_Distance_To_Roadways" />
+        <input type="number" @bind="userInputs.Horizontal_Distance_To_Roadways" />
     </div>
     <div class="input-row">
         <label>Hillshade at 9 am</label>
-        <input type="number" @bind="modelParameters.Hillshade_9am" />
+        <input type="number" @bind="userInputs.Hillshade_9am" />
     </div>
     <div class="input-row">
         <label>Hillshade at 12 am </label>
-        <input type="number" @bind="modelParameters.Hillshade_Noon" />
+        <input type="number" @bind="userInputs.Hillshade_Noon" />
     </div>
     <div class="input-row">
         <label>Hillshade at 3 pm</label>
-        <input type="number" @bind="modelParameters.Hillshade_3pm" />
+        <input type="number" @bind="userInputs.Hillshade_3pm" />
     </div>
     <div class="input-row">
         <label>Horizontal distance to fire points </label>
-        <input type="number" @bind="modelParameters.Horizontal_Distance_To_Fire_Points" />
+        <input type="number" @bind="userInputs.Horizontal_Distance_To_Fire_Points" />
     </div>
     <div class="input-row">
         <label>Wilderness area (1-4) </label>
-        <input type="number" @bind="modelParameters.Wilderness_Area" />
+        <input type="number" @bind="userInputs.Wilderness_Area" />
     </div>
     <div class="input-row">
         <label>Soil type (1-40) </label>
-        <input type="number" @bind="modelParameters.Soil_Type" />
+        <input type="number" @bind="userInputs.Soil_Type" />
     </div>
     <button class="submit" type="button" @onclick="HandlePrediction">Submit input data</button>
     <div class="error-container">
@@ -116,21 +119,22 @@
 </style>
 
 @code {
-    private ModelPrediction modelParameters = new();
+    private UserInputs userInputs = new();
     private string errorMessage = String.Empty;
     private const string modelContactURL = "http://fastapi-app:8000/";
     private int modelPredictionResult = 0;
 
+    [Inject] private ILogService LogService { get; set; } = default!;
     private async Task HandlePrediction()
     {
-        if (validInputValues(modelParameters))
+        if (validInputValues(userInputs))
         {
             try
             {
                 HttpClient client = new HttpClient();
                 client.BaseAddress = new Uri(modelContactURL);
 
-                HttpResponseMessage response = await client.PostAsJsonAsync("predict", modelParameters, new
+                HttpResponseMessage response = await client.PostAsJsonAsync("predict", userInputs, new
 System.Text.Json.JsonSerializerOptions
                 {
                     PropertyNamingPolicy = null
@@ -143,6 +147,9 @@ System.Text.Json.JsonSerializerOptions
                 modelPredictionResult = int.Parse(predictionResultString);
 
                 StateHasChanged();
+
+                await LogService.InsertSingleUserPredictionRequest(userInputs, modelPredictionResult, 1);
+
             }
             catch (Exception e)
             {
@@ -160,7 +167,7 @@ System.Text.Json.JsonSerializerOptions
 
     }
 
-    private bool validInputValues(ModelPrediction model)
+    private bool validInputValues(UserInputs model)
     {
         return true;
         //TODO

@@ -1,0 +1,77 @@
+﻿@page "/register"
+@using Forester.Application.DTOs
+@using Forester.Application.Interfaces
+@using Forester.DAL.Repositories
+
+@inject IAuthService authService
+
+<h3>Register</h3>
+<div class="register-form">
+    <label> Username</label>
+    <input class="input-username" type="text" @bind="@username" />
+    <label> Password</label>
+    <input class="input-password" type="password" @bind="@password" />
+    <button type="button" @onclick="HandleUserRegistration">Register</button>
+    <p class="info-p">@message</p>
+    <p class="no-account-p">Already have an account? <a href="login">Click to login</a></p>
+</div>
+
+<style>
+    h3 {
+        width: 10%;
+        margin-left: auto;
+        margin: auto;
+        text-align: center;
+        margin-top: 1%;
+        margin-bottom: 2%;
+    }
+
+    .register-form {
+        background-color: black;
+        width: 30%;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    label {
+        display: block;
+    }
+
+    input {
+        width: 70%;
+    }
+
+    button {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 1%;
+        width: 40%;
+        background-color: darkolivegreen;
+    }
+
+    p a {
+        color: orange;
+    }
+</style>
+
+@code {
+    private string username = "";
+    private string password = "";
+    private string message = "";
+    
+    private async Task HandleUserRegistration()
+    {
+        try
+        {
+            UserDTO userDTO = await authService.RegisterAsync(username, password);
+            message = "Registration was successfull";
+        }
+        catch (Exception e)
+        {
+            message = $"Something is not right: {e}";
+        }
+    }
+
+}

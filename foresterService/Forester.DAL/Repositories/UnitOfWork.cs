@@ -1,24 +1,26 @@
 using System;
+using forester.Domain.Entities;
 using forester.Domain.Interfaces;
 using Forester.DAL.data;
 namespace Forester.DAL.Repositories;
 
 public class UnitOfWork : IUnitOfWork
 {
-    public IModelPredictionRepository Predictions { get; }
-    public ILogger Logger { get; }
+    public ILogRepository Logs { get; }
+
+    public IUserRepository Users { get; }
 
     private readonly ForesterDBContext context;
 
     public UnitOfWork(
         ForesterDBContext context,
-        IModelPredictionRepository predictions,
-        ILogger logger
+        ILogRepository logs,
+        IUserRepository users
         )
     {
         this.context = context;
-        Predictions = predictions;
-        Logger = logger;
+        Logs = logs;
+        Users = users;
     }
 
     public async Task<int> SaveChangesAsync()

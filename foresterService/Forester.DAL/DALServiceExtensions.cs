@@ -11,10 +11,11 @@ public static class DALServiceExtensions
 {
     public static IServiceCollection SetDALServices(this IServiceCollection services, string connectiontring)
     {
-        services.AddDbContext<ForesterDBContext>(opt => opt.UseSqlServer(connectiontring));
+        services.AddDbContext<ForesterDBContext>(opt => opt.UseSqlite(connectiontring));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IModelPredictionRepository, ModelPredictionRepository>();
+        services.AddScoped<ILogRepository, LogRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         return services;
     }

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Forester.Application/Forester.Application.csproj" />
+  <Project Path="Forester.DAL/Forester.DAL.csproj" />
+  <Project Path="forester.Domain/forester.Domain.csproj" />
+  <Project Path="Forester/Forester.csproj" />
+</Solution>
