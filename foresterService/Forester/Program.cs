@@ -1,8 +1,10 @@
+using forester.Domain.Entities;
 using Forester.Application.data;
 using Forester.Components;
 using Forester.DAL;
 using Forester.DAL.data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -12,21 +14,34 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.SetDALServices(
-    builder.Configuration.GetConnectionString("ForesterConnection")!);
-
 builder.Services.SetApplicationServices(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/login";
-        options.Cookie.Name = "auth_token";
-        options.LoginPath = "/login";
-        options.AccessDeniedPath = "/access-denied";
-    });
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+}).AddIdentityCookies();
+
+builder.Services.AddIdentityCore<User>()
+    .AddEntityFrameworkStores<ForesterDBContext>()
+    .AddSignInManager();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/login";
+    options.AccessDeniedPath = "/access-denied";
+});
+
+var dbFolder = Path.Combine(builder.Environment.ContentRootPath, "forester-data");
+Directory.CreateDirectory(dbFolder); // Ensures the folder exists if missing
+
+var dbPath = Path.Combine(dbFolder, "forester.db");
+var connectionString = $"Data Source={dbPath}";
+
+builder.Services.SetDALServices(connectionString);
+
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
@@ -50,11 +65,12 @@ if (!app.Environment.IsDevelopment())
 // }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-app.UseAntiforgery();
-app.UseAuthorization();
+
 app.UseAuthentication();
+app.UseAuthorization();
+app.UseAntiforgery();
+
 
 app.MapControllers();
 

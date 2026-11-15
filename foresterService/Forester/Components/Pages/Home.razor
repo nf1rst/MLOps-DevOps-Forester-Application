@@ -1,64 +1,70 @@
 ﻿@page "/"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+
 
 <PageTitle>Home</PageTitle>
+<AuthorizeView>
+    <h1>Hello, welcome to Forester @context.User.Identity?.Name!</h1>
 
-<h1>Hello, welcome to Forester!</h1>
+    <h2>This is page contains classified information about the project</h2>
 
-<h2>This is page contains classified information about the project</h2>
+    <h3>Continue reading at your own risk</h3>
 
-<h3>Continue reading at your own risk</h3>
+    <table>
+        <tr>
+            <th>Work context</th>
+            <td>Forestry service is estimating the cover types for unexplored areas</td>
+        </tr>
 
-<table>
-    <tr>
-        <th>Work context</th>
-        <td>Forestry service is estimating the cover types for unexplored areas</td>
-    </tr>
+        <tr>
+            <th>Data set</th>
+            <td>Covertype - UCI Machine Learning Repository, ID 31 (archive.ics.uci.edu)</td>
+        </tr>
 
-    <tr>
-        <th>Data set</th>
-        <td>Covertype - UCI Machine Learning Repository, ID 31 (archive.ics.uci.edu)</td>
-    </tr>
+        <tr>
+            <th>ML task</th>
+            <td>Multiclass classification: 7 types of ground covers</td>
+        </tr>
 
-    <tr>
-        <th>ML task</th>
-        <td>Multiclass classification: 7 types of ground covers</td>
-    </tr>
+        <tr>
+            <th>Quality gate</th>
+            <td>Macro-F1 >= baseline + 0.02</td>
+        </tr>
 
-    <tr>
-        <th>Quality gate</th>
-        <td>Macro-F1 >= baseline + 0.02</td>
-    </tr>
+        <tr>
+            <th>C# component</th>
+            <td>Blazor web application for forestry officers</td>
+        </tr>
 
-    <tr>
-        <th>C# component</th>
-        <td>Blazor web application for forestry officers</td>
-    </tr>
+        <tr>
+            <th>Branching strategy</th>
+            <td>GitFlow (main, developer, feature/*, release/*, hotfix/*)</td>
+        </tr>
 
-    <tr>
-        <th>Branching strategy</th>
-        <td>GitFlow (main, developer, feature/*, release/*, hotfix/*)</td>
-    </tr>
+        <tr>
+            <th>Drift scenario</th>
+            <td>New area: greater percentage of "Wilderness_Area4", lesser "Elevation"</td>
+        </tr>
 
-    <tr>
-        <th>Drift scenario</th>
-        <td>New area: greater percentage of "Wilderness_Area4", lesser "Elevation"</td>
-    </tr>
+        <tr>
+            <th>RFC-1(normal)</th>
+            <td>Batch prediction for a CSV file of data</td>
+        </tr>
 
-    <tr>
-        <th>RFC-1(normal)</th>
-        <td>Batch prediction for a CSV file of data</td>
-    </tr>
+        <tr>
+            <th>RFC-2(urgent)</th>
+            <td>A 400MB model is slowing the container start and fails the readiness probe</td>
+        </tr>
 
-    <tr>
-        <th>RFC-2(urgent)</th>
-        <td>A 400MB model is slowing the container start and fails the readiness probe</td>
-    </tr>
+        <tr>
+            <th>RFC-3(normal, ML)</th>
+            <td>Switch to a lighter model (eg. LightGBM instead of Random Forest) with a less than 0.01 macro-F1 loss
+            </td>
+        </tr>
+    </table>
 
-    <tr>
-        <th>RFC-3(normal, ML)</th>
-        <td>Switch to a lighter model (eg. LightGBM instead of Random Forest) with a less than 0.01 macro-F1 loss</td>
-    </tr>
-</table>
+</AuthorizeView>
 
 <style>
     h1,
@@ -85,3 +91,19 @@
         padding: 1%;
     }
 </style>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authStateTask { get; set; } = default!;
+
+    private async Task DoSomethingWithUser()
+    {
+        var authState = await authStateTask;
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var username = user.Identity.Name;
+        }
+    }
+}

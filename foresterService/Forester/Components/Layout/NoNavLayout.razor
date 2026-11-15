@@ -1,11 +1,35 @@
 ﻿@inherits LayoutComponentBase
 
-<div>
+<div class="background">
     <main>
         @Body
     </main>
 </div>
 
+
+<style>
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgb(37, 38, 37);
+        color: olivedrab;
+    }
+
+    .background {
+        font-family: 'Ubuntu Mono';
+    }
+
+    main {
+        background margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        align-items: center;
+        height: 100%;
+    }
+</style>
 @code {
 
 }

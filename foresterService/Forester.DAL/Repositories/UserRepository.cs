@@ -16,7 +16,7 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetUserByUsername(string username)
     {
-        return await context.Users.FirstOrDefaultAsync(u => u.Username == username);
+        return await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
     }
 
     public async Task InsertUserAsync(User user)
@@ -32,6 +32,6 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> UsernameInUse(string username)
     {
-        return await context.Users.FirstOrDefaultAsync(u => u.Username == username) == null ? false : true;
+        return await context.Users.FirstOrDefaultAsync(u => u.UserName == username) == null ? false : true;
     }
 }

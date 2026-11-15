@@ -1,24 +1,33 @@
-﻿<div class="menu-bar">
-    <div class="nav-bar">
-        <nav>
-            <ul class="nav-bar-list">
-                <li><a href="/">Home</a></li>
-                <li><a href="instructions">Instructions</a></li>
-                <li><a href="batchPrediction">Batch prediction</a></li>
-                <li><a href="singlePrediction">Single prediction</a></li>
-                <li><a href="login">login</a></li>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using forester.Domain.Entities
 
-            </ul>
-        </nav>
-    </div>
+@inject SignInManager<User> SignInManager
+@inject NavigationManager NavigationManager
 
-    <div class="profile-bar">
-        <div class="profile-button">
-            <a href="profile">Profile</a>
-            <span class="profile-picture-fill"></span>
+<AuthorizeView>
+    <div class="menu-bar">
+        <div class="nav-bar">
+            <nav>
+                <ul class="nav-bar-list">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="instructions">Instructions</a></li>
+                    <li><a href="batchPrediction">Batch prediction</a></li>
+                    <li><a class="singlePrediction" href="singlePrediction">Single prediction</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="profile-bar">
+            <nav>
+                <ul>
+                    <li><a class="profile-button" href="profile">Profile(@context.User.Identity.Name)</a></li>
+                    <li><a class="logout-button" @onclick="LogOutUserAsync">Logout</a></li>
+                </ul>
+            </nav>
         </div>
     </div>
-</div>
+</AuthorizeView>
 
 <style>
     .menu-bar {
@@ -27,6 +36,7 @@
         background-color: rgb(35, 74, 25);
         margin: 0;
         padding: 0;
+        text-align: center;
     }
 
     .nav-bar {
@@ -53,8 +63,28 @@
     }
 
     .profile-bar {
-        width: 5%;
+        width: 10%;
         text-align: center;
         align-content: center;
+        display: flex;
+    }
+
+    .profile-button {
+        width: 50%;
+    }
+
+    .logout-button {
+        background-color: rgb(168, 10, 10);
+        border-radius: 15px;
+        margin: 1%;
+        cursor: pointer;
     }
 </style>
+
+@code {
+    private async Task LogOutUserAsync()
+    {
+        await SignInManager.SignOutAsync();
+        NavigationManager.NavigateTo("/login");
+    }
+}
