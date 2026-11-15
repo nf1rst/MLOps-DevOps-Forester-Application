@@ -30,9 +30,12 @@ services:
     ports:
       - 8080:8080
     environment:
+      - FORESTER_DB_PATH=/app/data/forester.db
+      - FORESTER_KEYS_PATH=/app/keys
       - ConnectionStrings__ForesterConnection=Data Source=/app/data/forester.db
     volumes:
       - ./forester-data:/app/data
+      - ./keys:/app/keys
     depends_on:
       fastapi-app:
         condition: service_started

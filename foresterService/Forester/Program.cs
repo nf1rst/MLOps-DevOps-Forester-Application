@@ -4,6 +4,7 @@ using Forester.Components;
 using Forester.DAL;
 using Forester.DAL.data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,10 +35,10 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/access-denied";
 });
 
-var dbFolder = Path.Combine(builder.Environment.ContentRootPath, "forester-data");
-Directory.CreateDirectory(dbFolder); // Ensures the folder exists if missing
+var dbPath = Environment.GetEnvironmentVariable("FORESTER_DB_PATH") ??
+    Path.Combine(builder.Environment.ContentRootPath, "forester-data", "forester.db");
+Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
-var dbPath = Path.Combine(dbFolder, "forester.db");
 var connectionString = $"Data Source={dbPath}";
 
 builder.Services.SetDALServices(connectionString);
@@ -46,6 +47,13 @@ builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddControllers();
+
+var keysPath = Environment.GetEnvironmentVariable("FORESTER_KEYS_PATH")
+    ?? Path.Combine(builder.Environment.ContentRootPath, "keys");
+
+builder.Services.AddDataProtection()
+.PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+.SetApplicationName("Forester");
 
 var app = builder.Build();
 
@@ -58,11 +66,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var context = scope.ServiceProvider.GetRequiredService<ForesterDBContext>();
-//     context.Database.Migrate();
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ForesterDBContext>();
+    context.Database.Migrate();
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
