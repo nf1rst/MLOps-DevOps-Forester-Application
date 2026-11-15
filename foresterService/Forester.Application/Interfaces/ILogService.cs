@@ -6,5 +6,5 @@ namespace Forester.Application.Services;
 
 public interface ILogService
 {
-    Task InsertSingleUserPredictionRequest(UserInputs prediction, int result, int userID);
+    Task InsertSingleUserPredictionRequest(UserInputs prediction, int result, string username);
 }

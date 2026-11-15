@@ -161,8 +161,9 @@ namespace Forester.DAL.Migrations
                     b.Property<DateTime>("Time")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserID")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("UserUsername")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -184,6 +185,13 @@ namespace Forester.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LogType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "User Activity"
+                        });
                 });
 
             modelBuilder.Entity("forester.Domain.Entities.User", b =>

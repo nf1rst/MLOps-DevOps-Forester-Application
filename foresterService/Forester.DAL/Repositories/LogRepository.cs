@@ -14,9 +14,9 @@ public class LogRepository : ILogRepository
         this.context = context;
     }
 
-    public async Task<List<Log>> GetAllLogsByUserID(int userID)
+    public async Task<List<Log>> GetAllLogsByUserUsername(string username)
     {
-        return await context.Log.Where(l => l.UserID == userID).ToListAsync();
+        return await context.Log.Where(l => l.UserUsername == username).ToListAsync();
     }
 
     public async Task InsertPredictionAsync(Log log)

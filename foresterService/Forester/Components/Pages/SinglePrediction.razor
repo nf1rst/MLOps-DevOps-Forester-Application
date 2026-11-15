@@ -1,6 +1,7 @@
 ﻿@page "/singlePrediction"
 @using System.Text.RegularExpressions
 @using Forester.Application.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @using forester.Domain.Entities
 @using Microsoft.AspNetCore.Components;
 
@@ -13,68 +14,69 @@
 
 <h6>Please enter values for single prediction of cover</h6>
 
-<div class="input-container">
-    <div class="input-row">
-        <label>Elevation</label>
-        @*https://stackoverflow.com/questions/69888168/how-to-set-input-box-value-to-a-string-in-blazor-webassembly *@
-        <input type="number" @bind="userInputs.Elevation" />
-    </div>
-    <div class="input-row">
-        <label>Aspect</label>
-        <input type="number" @bind="userInputs.Aspect" />
-    </div>
-    <div class="input-row">
-        <label>Slope</label>
-        <input type="number" @bind="userInputs.Slope" />
-    </div>
-    <div class="input-row">
-        <label>Vertical distance to hydrology</label>
-        <input type="number" @bind="userInputs.Vertical_Distance_To_Hydrology" />
-    </div>
-    <div class="input-row">
-        <label>Horizontal distance to hydrology</label>
-        <input type="number" @bind="userInputs.Horizontal_Distance_To_Hydrology" />
-    </div>
-    <div class="input-row">
-        <label>Horizontal distance to roadways</label>
-        <input type="number" @bind="userInputs.Horizontal_Distance_To_Roadways" />
-    </div>
-    <div class="input-row">
-        <label>Hillshade at 9 am</label>
-        <input type="number" @bind="userInputs.Hillshade_9am" />
-    </div>
-    <div class="input-row">
-        <label>Hillshade at 12 am </label>
-        <input type="number" @bind="userInputs.Hillshade_Noon" />
-    </div>
-    <div class="input-row">
-        <label>Hillshade at 3 pm</label>
-        <input type="number" @bind="userInputs.Hillshade_3pm" />
-    </div>
-    <div class="input-row">
-        <label>Horizontal distance to fire points </label>
-        <input type="number" @bind="userInputs.Horizontal_Distance_To_Fire_Points" />
-    </div>
-    <div class="input-row">
-        <label>Wilderness area (1-4) </label>
-        <input type="number" @bind="userInputs.Wilderness_Area" />
-    </div>
-    <div class="input-row">
-        <label>Soil type (1-40) </label>
-        <input type="number" @bind="userInputs.Soil_Type" />
-    </div>
-    <button class="submit" type="button" @onclick="HandlePrediction">Submit input data</button>
-    <div class="error-container">
-        <p class="error-text">@errorMessage</p>
-    </div>
+<AuthorizeView>
+    <div class="input-container">
+        <div class="input-row">
+            <label>Elevation</label>
+            @*https://stackoverflow.com/questions/69888168/how-to-set-input-box-value-to-a-string-in-blazor-webassembly *@
+            <input type="number" @bind="userInputs.Elevation" />
+        </div>
+        <div class="input-row">
+            <label>Aspect</label>
+            <input type="number" @bind="userInputs.Aspect" />
+        </div>
+        <div class="input-row">
+            <label>Slope</label>
+            <input type="number" @bind="userInputs.Slope" />
+        </div>
+        <div class="input-row">
+            <label>Vertical distance to hydrology</label>
+            <input type="number" @bind="userInputs.Vertical_Distance_To_Hydrology" />
+        </div>
+        <div class="input-row">
+            <label>Horizontal distance to hydrology</label>
+            <input type="number" @bind="userInputs.Horizontal_Distance_To_Hydrology" />
+        </div>
+        <div class="input-row">
+            <label>Horizontal distance to roadways</label>
+            <input type="number" @bind="userInputs.Horizontal_Distance_To_Roadways" />
+        </div>
+        <div class="input-row">
+            <label>Hillshade at 9 am</label>
+            <input type="number" @bind="userInputs.Hillshade_9am" />
+        </div>
+        <div class="input-row">
+            <label>Hillshade at 12 am </label>
+            <input type="number" @bind="userInputs.Hillshade_Noon" />
+        </div>
+        <div class="input-row">
+            <label>Hillshade at 3 pm</label>
+            <input type="number" @bind="userInputs.Hillshade_3pm" />
+        </div>
+        <div class="input-row">
+            <label>Horizontal distance to fire points </label>
+            <input type="number" @bind="userInputs.Horizontal_Distance_To_Fire_Points" />
+        </div>
+        <div class="input-row">
+            <label>Wilderness area (1-4) </label>
+            <input type="number" @bind="userInputs.Wilderness_Area" />
+        </div>
+        <div class="input-row">
+            <label>Soil type (1-40) </label>
+            <input type="number" @bind="userInputs.Soil_Type" />
+        </div>
+        <button class="submit" type="button" @onclick="HandlePrediction">Submit input data</button>
+        <div class="error-container">
+            <p class="error-text">@errorMessage</p>
+        </div>
 
-    <div class="model-answer-area">
-        <label>Model answer: </label>
-        <p className="model-answer">@modelPredictionResult</p>
+        <div class="model-answer-area">
+            <label>Model answer: </label>
+            <p className="model-answer">@modelPredictionResult</p>
+        </div>
+
     </div>
-
-</div>
-
+</AuthorizeView>
 
 <style>
     h2,
@@ -120,11 +122,13 @@
 
 @code {
     private UserInputs userInputs = new();
-    private string errorMessage = String.Empty;
-    private const string modelContactURL = "http://fastapi-app:8000/";
+    private string errorMessage = "";
+    private const string modelContactContainerURL = "http://fastapi-app:8000/";
+    private const string modelContactURLLocal = "http://localhost:8000";
     private int modelPredictionResult = 0;
 
     [Inject] private ILogService LogService { get; set; } = default!;
+    [CascadingParameter] private Task<AuthenticationState> authStateTask { get; set; } = default!;
     private async Task HandlePrediction()
     {
         if (validInputValues(userInputs))
@@ -132,7 +136,7 @@
             try
             {
                 HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(modelContactURL);
+                client.BaseAddress = new Uri(modelContactContainerURL);
 
                 HttpResponseMessage response = await client.PostAsJsonAsync("predict", userInputs, new
 System.Text.Json.JsonSerializerOptions
@@ -148,7 +152,14 @@ System.Text.Json.JsonSerializerOptions
 
                 StateHasChanged();
 
-                await LogService.InsertSingleUserPredictionRequest(userInputs, modelPredictionResult, 1);
+                var authState = await authStateTask;
+                var user = authState.User;
+                string username = "N/A";
+                if (user.Identity?.IsAuthenticated == true)
+                {
+                    username = user.Identity.Name!;
+                }
+                await LogService.InsertSingleUserPredictionRequest(userInputs, modelPredictionResult, username);
 
             }
             catch (Exception e)
