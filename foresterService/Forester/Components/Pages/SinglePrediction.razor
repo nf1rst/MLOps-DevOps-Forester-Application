@@ -124,7 +124,7 @@
     private UserInputs userInputs = new();
     private string errorMessage = "";
     private const string modelContactContainerURL = "http://fastapi-app:8000/";
-    private const string modelContactURLLocal = "http://localhost:8000";
+    private const string modelContactURLLocal = "http://localhost:8000/";
     private int modelPredictionResult = 0;
 
     [Inject] private ILogService LogService { get; set; } = default!;

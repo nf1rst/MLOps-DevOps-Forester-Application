@@ -1,4 +1,7 @@
 ﻿@page "/batchPrediction"
+@using System.Text.RegularExpressions
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using forester.Domain.Entities
 @rendermode InteractiveServer
 
 
@@ -13,7 +16,63 @@
     <p class="error">@errorMessage</p>
 </div>
 
+@if (inputsAndPredictions is not null && inputsAndPredictions.Any())
+{
+    <div class="result-display">
+        <QuickGrid class="quick-grid" Items="@inputsAndPredictions" Pagination="@pagination">
+            <PropertyColumn Property="@(p => p.Input.Elevation)" Title="Elevation" />
+            <PropertyColumn Property="@(p => p.Input.Aspect)" Title="Aspect" />
+            <PropertyColumn Property="@(p => p.Input.Slope)" Title="Slope" />
+            <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Hydrology)" Title="Horiz. Hydrology" />
+            <PropertyColumn Property="@(p => p.Input.Vertical_Distance_To_Hydrology)" Title="Vert. Hydrology" />
+            <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Roadways)" Title="Horiz. Roadways" />
+            <PropertyColumn Property="@(p => p.Input.Hillshade_9am)" Title="Hillshade 9am" />
+            <PropertyColumn Property="@(p => p.Input.Hillshade_Noon)" Title="Hillshade Noon" />
+            <PropertyColumn Property="@(p => p.Input.Hillshade_3pm)" Title="Hillshade 3pm" />
+            <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Fire_Points)" Title="Horiz. Fire Points" />
+            <PropertyColumn Property="@(p => p.Input.Wilderness_Area)" Title="Wilderness (1-4)" />
+            <PropertyColumn Property="@(p => p.Input.Soil_Type)" Title="Soil Type (1-40)" />
+            <PropertyColumn Property="@(p => p.Result)" Title="Predicted Cover Type" />
+        </QuickGrid>
+
+        <Paginator State="@pagination" />
+    </div>
+}
 <style>
+    .upload-element::file-selector-button {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .upload-element {
+        text-align: center;
+        align-items: center;
+    }
+
+    .result-display {
+        background-color: #1e1e1e;
+        width: 100%;
+        align-items: center;
+        text-align: center;
+        flex-direction: column;
+    }
+
+    .result-display table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .result-display th,
+    .result-display td {
+        text-align: center;
+    }
+
+    .result-display td {
+        border-left: 1px solid orange;
+        border-right: 1px solid orange;
+    }
+
     h6,
     h2 {
         text-align: center;
@@ -21,20 +80,29 @@
     }
 
     .upload-area {
-        background-color: red;
+        border: 1px solid orange;
         width: 40%;
         margin-left: auto;
         margin-right: auto;
+        display: block;
+        text-align: center;
     }
 
     .upload-element {
-        background-color: darkorange;
+        background-color: #1e1e1e;
         border-radius: 5px;
-        color: black;
+        color: white;
         height: 200px;
         align-content: center;
         margin-left: auto;
         margin-right: auto;
+        display: block;
+        text-align: center;
+    }
+
+    .submit {
+        background-color: darkgreen;
+        color: white;
     }
 </style>
 
@@ -42,7 +110,10 @@
 @code {
     private IBrowserFile? selectedFile;
     private string errorMessage = "";
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 15 };
 
+    private record TableInputPrediction(UserInputs Input, int Result);
+    private IQueryable<TableInputPrediction>? inputsAndPredictions;
     private void OnInputFileChange(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
@@ -59,11 +130,70 @@
 
         string content = await reader.ReadToEndAsync();
         string[] lines = content.Split("\n");
-        
 
-        @* serijalizacija svake linije u objekt 
-        objekt ide u listu 
-        lista ide prema fastAPI endpoitnu
-        vraca nazad odgovore *@
+        List<UserInputs> csvInputsList = new();
+        for (int i = 0; i <= lines.Count() - 1; i++)
+        {
+            int[] details = lines[i].Split(",").Select(int.Parse).ToArray();
+
+            var csvInput = DetailsIntoCsvInput(details);
+            setUserInputBinaryValues(csvInput, details);
+            csvInputsList.Add(csvInput);
+        }
+
+        var predictions = await sendBatchPredictionRequest(csvInputsList);
+        inputsAndPredictions = csvInputsList.Zip(predictions, (input, predictions) => new TableInputPrediction(input,
+predictions)).AsQueryable();
+    }
+
+    private async Task<List<int>> sendBatchPredictionRequest(List<UserInputs> csvInputsList)
+    {
+        string modelContactContainerURL = "http://fastapi-app:8000/";
+        string modelContactLocalURL = "http://localhost:8000/";
+
+        HttpClient client = new HttpClient();
+        client.BaseAddress = new Uri(modelContactContainerURL);
+
+        var payload = new { instances = csvInputsList };
+        HttpResponseMessage response = await client.PostAsJsonAsync("batchPredict", payload, new
+System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy = null
+        });
+        var result = await response.Content.ReadFromJsonAsync<BatchPredictionResponse>();
+        return result?.predictions ?? new List<int>();
+    }
+    private void setUserInputBinaryValues(UserInputs csvInput, int[] details)
+    {
+        int wildernessIndex = Array.IndexOf(details, 1, 10, 4);
+        csvInput.Wilderness_Area = wildernessIndex != -1 ? (wildernessIndex - 10) + 1 : 0;
+
+        int soilIndex = Array.IndexOf(details, 1, 14, 40);
+        csvInput.Soil_Type = soilIndex != -1 ? (soilIndex - 14) + 1 : 0;
+    }
+
+    private UserInputs DetailsIntoCsvInput(int[] details)
+    {
+        UserInputs input = new UserInputs()
+        {
+            Elevation = details[0],
+            Aspect = details[1],
+            Slope = details[2],
+            Horizontal_Distance_To_Hydrology = details[3],
+            Vertical_Distance_To_Hydrology = details[4],
+            Horizontal_Distance_To_Roadways = details[5],
+            Hillshade_9am = details[6],
+            Hillshade_Noon = details[7],
+            Hillshade_3pm = details[8],
+            Horizontal_Distance_To_Fire_Points = details[9],
+            Soil_Type = 1, //placeholder
+            Wilderness_Area = 1 //placeholder
+        };
+        return input;
+    }
+
+    private sealed class BatchPredictionResponse
+    {
+        public List<int> predictions { get; set; } = new();
     }
 }
